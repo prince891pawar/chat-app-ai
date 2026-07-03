@@ -9,6 +9,7 @@ app.use(cookieParser());
 app.use("/api/users", userRoutes);
 app.use("/api/users/login", userRoutes);
 app.use("/api/users/profile", userRoutes);
+app.use("/api/users/logout", userRoutes);
 
 
 export default app;

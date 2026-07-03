@@ -1,6 +1,7 @@
 import userModel from "../models/user.model.js"; 
 import * as userService from "../services/user.services.js";
-import {validationResult} from "express-validator"
+import {validationResult} from "express-validator";
+import redis from "../services/redis.service.js"
 
 export const createUserController = async (req, res) => {
  
@@ -59,4 +60,14 @@ export const loginController = async (req, res) => {
 export const ProfileController = async (req, res) => {
     console.log(req.user);
     return res.status(200).json({user: req.user})
+}
+
+export const logoutController = async (req, res) => {
+    try {
+        const token = req.cookies.token || req.headers.authorization?.split(" ")[1]; 
+        await redis.set(`blacklist_${token}`, token, "EX", 60 * 60 * 24); // Set token in Redis with expiration of 24 hours
+        return res.status(200).json({message: "Logged out successfully"})
+    } catch (error) {
+        return res.status(400).json({error: error.message})
+    }
 }

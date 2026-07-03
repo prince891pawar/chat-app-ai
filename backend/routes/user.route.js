@@ -17,4 +17,6 @@ import * as authMiddleware from "../middleware/auth.middleware.js"
 
 router.get("/profile", authMiddleware.authUser, userController.ProfileController);
 
+router.get("/logout", authMiddleware.authUser, userController.logoutController)
+
  export default router; 
