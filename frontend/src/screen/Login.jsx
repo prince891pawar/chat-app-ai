@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AxiosInstance from '../config/axios';
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -14,13 +15,17 @@ const Login = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!formData.email || !formData.password) {
-      setMessage('Please fill in both email and password.');
-      return;
-    }
-
-    setMessage(`Welcome back, ${formData.email}!`);
-    navigate('/');
+   AxiosInstance.post('/login', {
+      email: formData.email,
+      password: formData.password
+    }).then((response) => {
+      if (response.data.success) {
+        localStorage.setItem('token', response.data.token);
+        navigate('/');
+      } else {
+        setMessage(response.data.message);
+      }
+    }); 
   };
 
   return (

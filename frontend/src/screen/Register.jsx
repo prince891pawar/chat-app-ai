@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+  import AxiosInstance from '../config/axios';
+
 
 const Register = () => {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirmPassword: '' });
@@ -11,22 +13,27 @@ const Register = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+function SubmitHandler(e) {
+  e.preventDefault(); 
+  AxiosInstance.post('/api/users/register', {
+  email: formData.email,
+  password: formData.password,
+  name: formData.name,
+  confirmPassword: formData.confirmPassword
+})
+.then((res) => {
+  console.log(res.data);
+  navigate('/');
+})
+.catch((err) => {
+  console.log(err.response?.data);
 
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
-      setMessage('Please fill out all fields.');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setMessage('Passwords do not match.');
-      return;
-    }
-
-    setMessage(`Account created for ${formData.email}.`);
-    navigate('/login');
-  };
+  setMessage(
+    err.response?.data?.message || "Something went wrong"
+  );
+});
+  
+}
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center px-4 py-12 text-slate-100">
@@ -37,7 +44,7 @@ const Register = () => {
           <p className="mt-3 text-sm text-slate-400">Join the community and start chatting instantly.</p>
         </div>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={SubmitHandler}>
           <div>
             <label className="mb-2 block text-sm font-medium text-slate-300" htmlFor="name">
               Full name
