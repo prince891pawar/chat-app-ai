@@ -1,89 +1,132 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AxiosInstance from '../config/axios';
+import { userContext } from '../context/UserContext.jsx';
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
+
   const [message, setMessage] = useState('');
+
   const navigate = useNavigate();
+
+  // Context
+  const { setUser } = useContext(userContext);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-   AxiosInstance.post('/login', {
-      email: formData.email,
-      password: formData.password
-    }).then((response) => {
+    try {
+      const response = await AxiosInstance.post('/users/login', formData);
+
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
+
+        // Save user in Context
+        setUser(response.data.user);
+
         navigate('/');
       } else {
         setMessage(response.data.message);
       }
-    }); 
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message || 'Something went wrong'
+      );
+    }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 flex items-center justify-center px-4 py-12 text-slate-100">
-      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl shadow-black/40 backdrop-blur">
+      <div className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 p-8 shadow-2xl backdrop-blur">
+
         <div className="mb-8 text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-400">Welcome back</p>
-          <h1 className="mt-2 text-3xl font-semibold">Log in to your account</h1>
-          <p className="mt-3 text-sm text-slate-400">Access your chats and continue where you left off.</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-cyan-400">
+            Welcome Back
+          </p>
+
+          <h1 className="mt-2 text-3xl font-semibold">
+            Login
+          </h1>
+
+          <p className="mt-3 text-sm text-slate-400">
+            Login to continue.
+          </p>
         </div>
 
-        <form className="space-y-5" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-5">
+
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300" htmlFor="email">
+            <label htmlFor="email" className="mb-2 block text-sm">
               Email
             </label>
+
             <input
+              type="email"
               id="email"
               name="email"
-              type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="you@example.com"
-              className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+              required
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3"
+              placeholder="Enter Email"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-300" htmlFor="password">
+            <label htmlFor="password" className="mb-2 block text-sm">
               Password
             </label>
+
             <input
+              type="password"
               id="password"
               name="password"
-              type="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="••••••••"
-              className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/30"
+              required
+              className="w-full rounded-xl border border-slate-700 bg-slate-950 px-4 py-3"
+              placeholder="Enter Password"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-xl bg-cyan-500 px-4 py-3 font-semibold text-slate-950 transition hover:bg-cyan-400"
+            className="w-full rounded-xl bg-cyan-500 py-3 font-semibold text-black hover:bg-cyan-400"
           >
-            Sign in
+            Login
           </button>
+
         </form>
 
-        {message ? <p className="mt-4 text-center text-sm text-cyan-300">{message}</p> : null}
+        {message && (
+          <p className="mt-4 text-center text-red-400">
+            {message}
+          </p>
+        )}
 
         <p className="mt-6 text-center text-sm text-slate-400">
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="font-semibold text-cyan-400 transition hover:text-cyan-300">
-            Create one
+          Don't have an account?{' '}
+          <Link
+            to="/register"
+            className="text-cyan-400 hover:text-cyan-300"
+          >
+            Register
           </Link>
         </p>
+
       </div>
     </div>
   );

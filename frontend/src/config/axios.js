@@ -1,10 +1,11 @@
-import axios from 'axios'; 
+import axios from 'axios';
 
 const AxiosInstance = axios.create({
-  baseURL: import.meta.env.REACT_APP_API_URL,
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 export default AxiosInstance;
